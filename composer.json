@@ -1,0 +1,27 @@
+{
+    "name": "alex-van-vliet/tailwindnotifications",
+    "description": "A simple package to make tailwindcss notifications easily",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alex van Vliet",
+            "email": "alex@vanvliet.pro"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "AlexVanVliet\\TailwindNotifications\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AlexVanVliet\\TailwindNotifications\\TailwindNotificationsServiceProvider"
+            ],
+            "aliases": {
+                "Notifications": "AlexVanVliet\\TailwindNotifications\\TailwindNotificationsFacade"
+            }
+        }
+    }
+}
