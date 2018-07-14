@@ -8,7 +8,16 @@ class Bag
     protected $name;
     protected $plural;
     protected $notifications;
-    protected $function = null;
+    protected $html = [
+        'bag' => [
+            'start' => '',
+            'end' => '',
+        ],
+        'notification' => [
+            'start' => '',
+            'end' => '',
+        ],
+    ];
 
     public function __construct($session, $name, $plural, $options = [])
     {
@@ -16,6 +25,17 @@ class Bag
         $this->name = $name;
         $this->plural = $plural;
         $this->notifications = collect();
+        if(isset($options['html'])){
+            foreach (['bag', 'notification'] as $part) {
+                if (isset($options['html'][$part])) {
+                    foreach (['start', 'end'] as $position) {
+                        if (isset($options['html'][$part][$position])) {
+                            $this->html[$part][$position] = $options['html'][$part][$position];
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function getPlural()
@@ -46,22 +66,20 @@ class Bag
 
     public function render()
     {
-        if (!$this->function) {
-            $f = function ($notification, $first, $last) {
-                $text = $notification->render();
-                if ($notification->trim()) $text = trim($text);
-                if ($notification->sanitize()) $text = e($text);
-                if ($notification->lines()) $text = nl2br($text);
-                return '<p>' . $text . '</p>';
-            };
-        } else {
-            $f = $this->function;
-        }
-        $str = '';
         $last = $this->notifications->count() - 1;
+        if($last < 0) return '';
+        $str = $this->html['bag']['start'];
         foreach ($this->notifications as $k => $notification) {
-            $str .= $f($notification, $k === 0, $k === $last);
+            $text = $notification->render();
+            if ($notification->trim()) $text = trim($text);
+            if ($notification->sanitize()) $text = e($text);
+            if ($notification->lines()) $text = nl2br($text);
+
+            $str .= $this->html['notification']['start'];
+            $str .= $text;
+            $str .= $this->html['notification']['end'];
         }
+        $str .= $this->html['bag']['end'];
         return $str;
     }
 
