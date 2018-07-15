@@ -5,32 +5,53 @@ use Exception;
 
 class Notifications
 {
+    /** @var string[] The singular names of all the bags. */
     protected $names;
+
+    /** @var \AlexVanVliet\TailwindNotifications\Bag[string] The bags with their singular name as key. */
     protected $bags;
+
+    /** @var string[string] The plural version of */
     protected $plurals;
 
+    /**
+     * Notifications constructor.
+     *
+     * @param string[] $bags The list of all the singular bag names.
+     * @param array[string] $options The options for all the bags with the singular bag name as key and the options as value.
+     * @param \Illuminate\Contracts\Session\Session $session The session store.
+     *
+     * @throws \Exception The plural version of the bag name is the same as the singular version.
+     */
     public function __construct($bags, $options, $session)
     {
         $this->names = $bags;
         $this->bags = [];
         $this->plurals = [];
-        foreach ($this->names as $bag) {
-            if (isset($options[$bag]) && isset($options[$bag]['plural'])) {
-                $plural = $options[$bag]['plural'];
+        /** @var string $singular The bag singular name. */
+        foreach ($this->names as $singular) {
+            /** @var string $plural The bag plural name. */
+            if (isset($options[$singular]) && isset($options[$singular]['plural'])) {
+                $plural = $options[$singular]['plural'];
             } else {
-                $plural = str_plural($bag);
+                $plural = str_plural($singular);
             }
 
             if ($plural) {
-                if ($plural === $bag) {
-                    throw new Exception("Plural must be different from bag name ($bag). Please change the plural for '$bag' in the configuration file or set it to false to disable pluralization for this bag.");
+                if ($plural === $singular) {
+                    throw new Exception("Plural must be different from singular name ($singular). Please change the plural for '$singular' in the configuration file or set it to false to disable pluralization for this bag.");
                 }
-                $this->plurals[$plural] = $bag;
+                $this->plurals[$plural] = $singular;
             }
-            $this->bags[$bag] = new Bag($session, $bag, $plural, $options[$bag] ?? []);
+            $this->bags[$singular] = new Bag($session, $singular, $plural, $options[$singular] ?? []);
         }
     }
 
+    /**
+     * Check if one bag has a notification.
+     *
+     * @return bool
+     */
     public function hasNotifications()
     {
         foreach ($this->bags as $bag) {
@@ -41,6 +62,11 @@ class Notifications
         return false;
     }
 
+    /**
+     * Produce the html for all the bags.
+     *
+     * @return string
+     */
     public function render()
     {
         $str = '';
@@ -104,25 +130,51 @@ class Notifications
         throw new BadMethodCallException("Could not call method $name with $count arguments.");
     }
 
+    /**
+     * Get all the existing bag names.
+     *
+     * @return string[]
+     */
     public function getBagNames()
     {
         return $this->names;
     }
 
-    public function select($bagName)
+    /**
+     * Select a bag.
+     *
+     * @param string $singular The singular bag name.
+     *
+     * @throws BadMethodCallException The bag does not exist.
+     *
+     * @return \AlexVanVliet\TailwindNotifications\Bag
+     */
+    public function select($singular)
     {
-        if (in_array($bagName, $this->getBagNames())) {
-            return $this->bags[$bagName];
+        if (in_array($singular, $this->getBagNames())) {
+            return $this->bags[$singular];
         }
 
-        throw new BadMethodCallException("Bag $bagName does not exist.");
+        throw new BadMethodCallException("Bag $singular does not exist.");
     }
 
+    /**
+     * Get the singular version of a bag name.
+     *
+     * @param string $plural The plural version of the bag name.
+     *
+     * @return string|null
+     */
     public function getSingular($plural)
     {
         return $this->plurals[$plural] ?? null;
     }
 
+    /**
+     * Fetch the notifications from the session.
+     *
+     * @return void
+     */
     public function addFromSession()
     {
         foreach ($this->getBagNames() as $bagName) {
@@ -130,6 +182,13 @@ class Notifications
         }
     }
 
+    /**
+     * Get the plural version of a bag name.
+     *
+     * @param string $singular The singular version of the bag name.
+     *
+     * @return string|null
+     */
     public function getPlural($singular)
     {
         return $this->bags[$singular]->getPlural() ?: null;
