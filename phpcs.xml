@@ -7,6 +7,9 @@
 
     <file>./src/</file>
 
+    <config name="testVersion" value="7.1-"/>
+    <rule ref="PHPCompatibility"/>
+
     <rule ref="PEAR">
         <exclude name="PEAR.Commenting.FileComment.InvalidPackage"/>
         <exclude name="PEAR.Commenting.ClassComment.InvalidPackage"/>
