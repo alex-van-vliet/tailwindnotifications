@@ -9,7 +9,6 @@ class Notifications
     protected $bags;
     protected $session;
     protected $plurals;
-    protected $flasher;
 
     public function __construct($bags, $options, $session)
     {
@@ -51,11 +50,6 @@ class Notifications
             $str .= $bag->render();
         }
         return $str;
-    }
-
-    public function flash()
-    {
-        return $this->flasher;
     }
 
     public function __call($name, $arguments)
