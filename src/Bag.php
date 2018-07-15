@@ -53,21 +53,11 @@ class Bag
     protected $notifications;
 
     /**
-     * The html elements to use.
+     * The html helper.
      *
-     * @var array
+     * @var \AlexVanVliet\TailwindNotifications\HTMLHelper
      */
-    protected $html
-        = [
-            'bag' => [
-                'start' => '',
-                'end' => '',
-            ],
-            'notification' => [
-                'start' => '',
-                'end' => '',
-            ],
-        ];
+    protected $html;
 
     /**
      * Bag constructor.
@@ -83,17 +73,20 @@ class Bag
         $this->name = $name;
         $this->plural = $plural;
         $this->notifications = collect();
+        $this->html = new HTMLHelper(
+            [
+                'bag' => [
+                    'start' => '',
+                    'end' => '',
+                ],
+                'notification' => [
+                    'start' => '',
+                    'end' => '',
+                ],
+            ]
+        );
         if (isset($options['html'])) {
-            foreach (['bag', 'notification'] as $part) {
-                if (isset($options['html'][$part])) {
-                    foreach (['start', 'end'] as $position) {
-                        if (isset($options['html'][$part][$position])) {
-                            $this->html[$part][$position]
-                                = $options['html'][$part][$position];
-                        }
-                    }
-                }
-            }
+            $this->html->set($options['html']);
         }
     }
 
@@ -160,7 +153,7 @@ class Bag
         if ($last < 0) {
             return '';
         }
-        $str = $this->html['bag']['start'];
+        $str = $this->html->bag('start');
         foreach ($this->notifications as $k => $notification) {
             $text = $notification->render();
             if ($notification->trim()) {
@@ -173,11 +166,11 @@ class Bag
                 $text = nl2br($text);
             }
 
-            $str .= $this->html['notification']['start'];
+            $str .= $this->html->notification('start');
             $str .= $text;
-            $str .= $this->html['notification']['end'];
+            $str .= $this->html->notification('end');
         }
-        $str .= $this->html['bag']['end'];
+        $str .= $this->html->bag('end');
         return $str;
     }
 
