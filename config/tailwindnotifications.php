@@ -54,7 +54,7 @@ return [
                 ],
             ],
         ],
-        'default' => [
+        'message' => [
             'html' => [
                 'bag' => [
                     'start' => '
