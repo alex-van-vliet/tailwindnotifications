@@ -7,12 +7,10 @@ class Notifications
 {
     protected $names;
     protected $bags;
-    protected $session;
     protected $plurals;
 
     public function __construct($bags, $options, $session)
     {
-        $this->session = $session;
         $this->names = $bags;
         $this->bags = [];
         $this->plurals = [];
@@ -29,7 +27,7 @@ class Notifications
                 }
                 $this->plurals[$plural] = $bag;
             }
-            $this->bags[$bag] = new Bag($this->session, $bag, $plural, $options[$bag] ?? []);
+            $this->bags[$bag] = new Bag($session, $bag, $plural, $options[$bag] ?? []);
         }
     }
 
