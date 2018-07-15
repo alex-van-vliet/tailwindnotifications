@@ -9,6 +9,8 @@
  * @link      https://github.com/alex-van-vliet/tailwindnotifications
  */
 
+use AlexVanVliet\TailwindNotifications\Notifications;
+
 /**
  * Flash helper.
  *
@@ -19,7 +21,7 @@
  */
 function flash($bag, ...$params)
 {
-    Notifications::flash($bag, ...$params);
+    app(Notifications::class)->flash($bag, ...$params);
 }
 
 /**
@@ -32,5 +34,5 @@ function flash($bag, ...$params)
  */
 function instant($bag, ...$params)
 {
-    Notifications::instant($bag, ...$params);
+    app(Notifications::class)->instant($bag, ...$params);
 }
