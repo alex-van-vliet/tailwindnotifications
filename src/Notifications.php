@@ -123,17 +123,16 @@ class Notifications
      *
      * @throws \BadMethodCallException
      *
-     * @return $this
+     * @return $this|\AlexVanVliet\TailwindNotifications\Bag
      */
     public function __call($name, $arguments)
     {
         if (in_array($name, $this->getBagNames())) {
             switch (count($arguments)) {
             case 0:
-                $this->select($name);
-                return $this;
+                return $this->select($name);
             case 1:
-                $this->select($name)->push(reset($arguments));
+                $this->select($name)->push($arguments[0]);
                 return $this;
             default:
                 $this->select($name)->push($arguments);
@@ -162,7 +161,7 @@ class Notifications
                 ) {
                     switch (count($arguments)) {
                     case 1:
-                        $this->select($name)->flash(reset($arguments));
+                        $this->select($name)->flash($arguments[0]);
                         return $this;
                     default:
                         $this->select($name)->flash($arguments);
