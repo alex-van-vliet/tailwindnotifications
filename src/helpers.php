@@ -19,7 +19,7 @@
  */
 function flash($bag, ...$params)
 {
-    Notifications::{'flash' . ucfirst($bag)}(...$params);
+    Notifications::flash($bag, ...$params);
 }
 
 /**
@@ -32,5 +32,5 @@ function flash($bag, ...$params)
  */
 function instant($bag, ...$params)
 {
-    Notifications::{$bag}(...$params);
+    Notifications::instant($bag, ...$params);
 }

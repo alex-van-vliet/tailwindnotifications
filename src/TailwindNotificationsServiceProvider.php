@@ -106,7 +106,7 @@ class TailwindNotificationsServiceProvider extends ServiceProvider
                 return new Notifications(
                     $app->make(Session::class),
                     array_keys(config('tailwindnotifications.bags')),
-                    config('tailwindnotifications.bags')
+                    config('tailwindnotifications')
                 );
             }
         );

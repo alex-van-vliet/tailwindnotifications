@@ -61,10 +61,10 @@ class Notifications
         $this->bags = [];
         $this->plurals = [];
         foreach ($this->names as $singular) {
-            if (isset($options[$singular])
-                && isset($options[$singular]['plural'])
+            if (isset($options['bags'][$singular])
+                && isset($options['bags'][$singular]['plural'])
             ) {
-                $plural = $options[$singular]['plural'];
+                $plural = $options['bags'][$singular]['plural'];
             } else {
                 $plural = str_plural($singular);
             }
@@ -81,7 +81,7 @@ class Notifications
                 $this->plurals[$plural] = $singular;
             }
             $this->bags[$singular] = new Bag(
-                $session, $singular, $plural, $options[$singular] ?? []
+                $session, $singular, $plural, $options['bags'][$singular] ?? []
             );
         }
     }
@@ -128,61 +128,23 @@ class Notifications
     public function __call($name, $arguments)
     {
         if (in_array($name, $this->getBagNames())) {
-            switch (count($arguments)) {
-            case 0:
+            if (empty($arguments)) {
                 return $this->select($name);
-            case 1:
-                $this->select($name)->push($arguments[0]);
-                return $this;
-            default:
-                $this->select($name)->push($arguments);
-                return $this;
             }
-        } else {
-            if (($bag = $this->getSingular($name)) && !empty($arguments)) {
-                switch (count($arguments)) {
-                case 1:
-                    $this->select($bag)->pushSeveral(
-                        is_array($arguments[0]) ? $arguments[0] : $arguments
-                    );
-                    return $this;
-                default:
-                    $this->select($bag)->pushSeveral($arguments);
-                    return $this;
-                }
-            }
+            return $this->instant($name, ...$arguments);
         }
-        if (starts_with($name, 'flash')) {
+        if ($this->getSingular($name) && !empty($arguments)) {
+            return $this->instant($name, ...$arguments);
+        }
+        if (starts_with($name, 'flash') && !empty($arguments)) {
             $name = lcfirst(substr($name, 5));
 
             if ($name) {
-                if (in_array($name, $this->getBagNames())
-                    && !empty($arguments)
-                ) {
-                    switch (count($arguments)) {
-                    case 1:
-                        $this->select($name)->flash($arguments[0]);
-                        return $this;
-                    default:
-                        $this->select($name)->flash($arguments);
-                        return $this;
-                    }
-                } else {
-                    if (($bag = $this->getSingular($name))
-                        && !empty($arguments)
-                    ) {
-                        switch (count($arguments)) {
-                        case 1:
-                            $this->select($bag)->flashSeveral(
-                                is_array($arguments[0]) ? $arguments[0]
-                                    : $arguments
-                            );
-                            return $this;
-                        default:
-                            $this->select($bag)->flashSeveral($arguments);
-                            return $this;
-                        }
-                    }
+                if (in_array($name, $this->getBagNames())) {
+                    return $this->flash($name, ...$arguments);
+                }
+                if ($this->getSingular($name)) {
+                    return $this->flash($name, ...$arguments);
                 }
             }
         }
@@ -222,6 +184,51 @@ class Notifications
     }
 
     /**
+     * Handles instant notifications.
+     *
+     * @param string $bag          The bag name.
+     * @param array  ...$arguments The notifications.
+     *
+     * @throws \BadMethodCallException
+     * @throws \Exception
+     *
+     * @return $this
+     */
+    public function instant($bag, ...$arguments)
+    {
+        if (empty($arguments)) {
+            throw new BadMethodCallException(
+                "Could not call method "
+                . "instant with 1 parameters."
+            );
+        }
+        if (in_array($bag, $this->getBagNames())) {
+            switch (count($arguments)) {
+            case 1:
+                $this->select($bag)->push($arguments[0]);
+                break;
+            default:
+                $this->select($bag)->push($arguments);
+                break;
+            }
+        } elseif ($bag = $this->getSingular($bag)) {
+            switch (count($arguments)) {
+            case 1:
+                $this->select($bag)->pushSeveral(
+                    is_array($arguments[0]) ? $arguments[0] : $arguments
+                );
+                break;
+            default:
+                $this->select($bag)->pushSeveral($arguments);
+                break;
+            }
+        } else {
+            throw new Exception("Bag $bag does not exist.");
+        }
+        return $this;
+    }
+
+    /**
      * Get the singular version of a bag name.
      *
      * @param string $plural The plural version of the bag name.
@@ -231,6 +238,51 @@ class Notifications
     public function getSingular($plural)
     {
         return $this->plurals[$plural] ?? null;
+    }
+
+    /**
+     * Handles flash notifications.
+     *
+     * @param string $bag          The bag name.
+     * @param array  ...$arguments The notifications.
+     *
+     * @throws \BadMethodCallException
+     * @throws \Exception
+     *
+     * @return $this
+     */
+    public function flash($bag, ...$arguments)
+    {
+        if (empty($arguments)) {
+            throw new BadMethodCallException(
+                "Could not call method "
+                . "flash with 1 parameters."
+            );
+        }
+        if (in_array($bag, $this->getBagNames())) {
+            switch (count($arguments)) {
+            case 1:
+                $this->select($bag)->flash($arguments[0]);
+                break;
+            default:
+                $this->select($bag)->flash($arguments);
+                break;
+            }
+        } elseif ($bag = $this->getSingular($bag)) {
+            switch (count($arguments)) {
+            case 1:
+                $this->select($bag)->flashSeveral(
+                    is_array($arguments[0]) ? $arguments[0] : $arguments
+                );
+                break;
+            default:
+                $this->select($bag)->flashSeveral($arguments);
+                break;
+            }
+        } else {
+            throw new Exception("Bag $bag does not exist.");
+        }
+        return $this;
     }
 
     /**
