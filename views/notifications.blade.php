@@ -1,1 +1,1 @@
-{!! $notifications->render() !!}
+{!! Notifications::render() !!}
