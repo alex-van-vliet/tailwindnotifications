@@ -18,7 +18,7 @@ class Notifications
         $this->bags = [];
         $this->plurals = [];
         foreach ($this->names as $bag) {
-            if (isset($options[$bag]['plural'])) {
+            if (isset($options[$bag]) && isset($options[$bag]['plural'])) {
                 $plural = $options[$bag]['plural'];
             } else {
                 $plural = str_plural($bag);
