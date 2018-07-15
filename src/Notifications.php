@@ -298,6 +298,18 @@ class Notifications
     }
 
     /**
+     * Flash the notifications to the session.
+     *
+     * @return void
+     */
+    public function putInSession()
+    {
+        foreach ($this->getBagNames() as $bagName) {
+            $this->select($bagName)->putInSession();
+        }
+    }
+
+    /**
      * Get the plural version of a bag name.
      *
      * @param string $singular The singular version of the bag name.

@@ -12,6 +12,7 @@
 namespace AlexVanVliet\TailwindNotifications;
 
 use AlexVanVliet\TailwindNotifications\Notifications\I18nTextNotification;
+use Exception;
 
 /**
  * A bag of notifications.
@@ -48,9 +49,16 @@ class Bag
     /**
      * The list of notifications.
      *
-     * @var \Illuminate\Support\Collection
+     * @var array
      */
     protected $notifications;
+
+    /**
+     * The list of notifications to be flashed.
+     *
+     * @var array
+     */
+    protected $flashNotifications;
 
     /**
      * The html helper.
@@ -72,7 +80,8 @@ class Bag
         $this->session = $session;
         $this->name = $name;
         $this->plural = $plural;
-        $this->notifications = collect();
+        $this->notifications = [];
+        $this->flashNotifications = [];
         $this->html = new HTMLHelper(
             [
                 'bag' => [
@@ -88,16 +97,6 @@ class Bag
         if (isset($options['html'])) {
             $this->html->set($options['html']);
         }
-    }
-
-    /**
-     * Get the plural version of the name of the bag.
-     *
-     * @return string|false
-     */
-    public function getPlural()
-    {
-        return $this->plural;
     }
 
     /**
@@ -136,9 +135,9 @@ class Bag
     public function push($notification)
     {
         if ($notification instanceof Notification) {
-            $this->notifications->push($notification);
+            $this->notifications[] = $notification;
         } else {
-            $this->notifications->push(new I18nTextNotification($notification));
+            $this->notifications[] = new I18nTextNotification($notification);
         }
     }
 
@@ -149,7 +148,7 @@ class Bag
      */
     public function render()
     {
-        $last = $this->notifications->count() - 1;
+        $last = count($this->notifications) - 1;
         if ($last < 0) {
             return '';
         }
@@ -175,18 +174,6 @@ class Bag
     }
 
     /**
-     * Flash a notification.
-     *
-     * @param string|\AlexVanVliet\TailwindNotifications\Notification $notification The notification
-     *
-     * @return void
-     */
-    public function flash($notification)
-    {
-        $this->session->flash("notifications.$this->name", $notification);
-    }
-
-    /**
      * Flash several notifications.
      *
      * @param array $notifications The notifications.
@@ -195,7 +182,21 @@ class Bag
      */
     public function flashSeveral($notifications)
     {
-        $this->session->flash("notifications.$this->plural", $notifications);
+        foreach ($notifications as $notification) {
+            $this->flash($notification);
+        }
+    }
+
+    /**
+     * Flash a notification.
+     *
+     * @param string|\AlexVanVliet\TailwindNotifications\Notification $notification The notification
+     *
+     * @return void
+     */
+    public function flash($notification)
+    {
+        $this->flashNotifications[] = $notification;
     }
 
     /**
@@ -221,12 +222,52 @@ class Bag
     }
 
     /**
+     * Flash the notifications to the session.
+     *
+     * @throws \Exception
+     *
+     * @return void
+     */
+    public function putInSession()
+    {
+        if (!$this->flashNotifications) {
+            return;
+        }
+        if ($this->plural) {
+            $this->session->flash(
+                "notifications.$this->plural", $this->flashNotifications
+            );
+        } else {
+            if (count($this->flashNotifications) === 1) {
+                $this->session->flash(
+                    "notifications.$this->name", $this->flashNotifications[0]
+                );
+            } else {
+                throw new Exception(
+                    "Could not flash multiple notifications without '
+                    .'a plural version of the name of the bag."
+                );
+            }
+        }
+    }
+
+    /**
+     * Get the plural version of the name of the bag.
+     *
+     * @return string|false
+     */
+    public function getPlural()
+    {
+        return $this->plural;
+    }
+
+    /**
      * Whether the bag has any notifications.
      *
      * @return bool
      */
     public function hasNotifications()
     {
-        return $this->notifications->count() > 0;
+        return count($this->notifications) > 0;
     }
 }

@@ -65,6 +65,10 @@ class TailwindNotificationsMiddleware
 
         $this->view->share('notifications', $this->notifications);
 
-        return $next($request);
+        $response = $next($request);
+
+        $this->notifications->putInSession();
+
+        return $response;
     }
 }
