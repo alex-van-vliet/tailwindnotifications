@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="tailwindnotifications">
+    <description>TailwindNotifications Coding Standard</description>
+
+    <arg name="extensions" value="php"></arg>
+    <arg value="sp"/>
+
+    <file>./src/</file>
+
+    <rule ref="PEAR">
+        <exclude name="PEAR.Commenting.FileComment.InvalidPackage"/>
+        <exclude name="PEAR.Commenting.ClassComment.InvalidPackage"/>
+        <exclude name="PEAR.Commenting.FileComment.MissingCategoryTag"/>
+        <exclude name="PEAR.Commenting.ClassComment.MissingCategoryTag"/>
+    </rule>
+</ruleset>

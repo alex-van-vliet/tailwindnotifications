@@ -1,18 +1,50 @@
-<?php namespace AlexVanVliet\TailwindNotifications;
+<?php
+/**
+ * PHP version 7
+ *
+ * @package   alex-van-vliet/tailwindnotifications
+ * @author    Alex van Vliet <alex@vanvliet.pro>
+ * @copyright 2018 Alex van Vliet
+ * @license   https://github.com/alex-van-vliet/tailwindnotifications/license.md MIT
+ * @link      https://github.com/alex-van-vliet/tailwindnotifications
+ */
+
+namespace AlexVanVliet\TailwindNotifications;
 
 use Closure;
-use Illuminate\Session\SessionManager;
 use Illuminate\View\Factory;
 
+/**
+ * Load the notifications from the session and share the notifications to the view.
+ *
+ * @package   alex-van-vliet/tailwindnotifications
+ * @author    Alex van Vliet <alex@vanvliet.pro>
+ * @copyright 2018 Alex van Vliet
+ * @license   https://github.com/alex-van-vliet/tailwindnotifications/license.md MIT
+ * @link      https://github.com/alex-van-vliet/tailwindnotifications
+ */
 class TailwindNotificationsMiddleware
 {
-    protected $notifications;
-    protected $view;
     /**
-     * @var SessionManager
+     * The notifications.
+     *
+     * @var \AlexVanVliet\TailwindNotifications\Notifications
      */
-    private $session;
+    protected $notifications;
 
+    /**
+     * The view factory.
+     *
+     * @var \Illuminate\View\Factory
+     */
+    protected $view;
+
+    /**
+     * TailwindNotificationsMiddleware constructor.
+     *
+     * @param \AlexVanVliet\TailwindNotifications\Notifications $notifications The notifications.
+     * @param \Illuminate\View\Factory                          $view          The view factory.
+     */
     public function __construct(Notifications $notifications, Factory $view)
     {
         $this->notifications = $notifications;
@@ -22,8 +54,9 @@ class TailwindNotificationsMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure $next
+     * @param \Illuminate\Http\Request $request The current request.
+     * @param \Closure                 $next    The next action.
+     *
      * @return mixed
      */
     public function handle($request, Closure $next)

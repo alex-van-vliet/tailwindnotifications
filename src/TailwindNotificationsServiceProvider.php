@@ -1,10 +1,28 @@
 <?php
+/**
+ * PHP version 7
+ *
+ * @package   alex-van-vliet/tailwindnotifications
+ * @author    Alex van Vliet <alex@vanvliet.pro>
+ * @copyright 2018 Alex van Vliet
+ * @license   https://github.com/alex-van-vliet/tailwindnotifications/license.md MIT
+ * @link      https://github.com/alex-van-vliet/tailwindnotifications
+ */
 
 namespace AlexVanVliet\TailwindNotifications;
 
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Register and boot required package services.
+ *
+ * @package   alex-van-vliet/tailwindnotifications
+ * @author    Alex van Vliet <alex@vanvliet.pro>
+ * @copyright 2018 Alex van Vliet
+ * @license   https://github.com/alex-van-vliet/tailwindnotifications/license.md MIT
+ * @link      https://github.com/alex-van-vliet/tailwindnotifications
+ */
 class TailwindNotificationsServiceProvider extends ServiceProvider
 {
     /**
@@ -36,10 +54,16 @@ class TailwindNotificationsServiceProvider extends ServiceProvider
      */
     protected function bootPublishedFiles()
     {
-        $this->publishes([
-            __DIR__ . '/../config/tailwindnotifications.php' => config_path('tailwindnotifications.php'),
-            __DIR__ . '/../views' => resource_path('views/vendor/tailwindnotifications'),
-        ]);
+        $this->publishes(
+            [
+                __DIR__ . '/../config/tailwindnotifications.php' => config_path(
+                    'tailwindnotifications.php'
+                ),
+                __DIR__ . '/../views' => resource_path(
+                    'views/vendor/tailwindnotifications'
+                ),
+            ]
+        );
     }
 
     /**
@@ -64,7 +88,8 @@ class TailwindNotificationsServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/tailwindnotifications.php', 'tailwindnotifications'
+            __DIR__ . '/../config/tailwindnotifications.php',
+            'tailwindnotifications'
         );
     }
 
@@ -75,13 +100,16 @@ class TailwindNotificationsServiceProvider extends ServiceProvider
      */
     protected function registerNotifications()
     {
-        $this->app->singleton(Notifications::class, function ($app) {
-            return new Notifications(
-                array_keys(config('tailwindnotifications.bags')),
-                config('tailwindnotifications.bags'),
-                $app->make(Session::class)
-            );
-        });
+        $this->app->singleton(
+            Notifications::class,
+            function ($app) {
+                return new Notifications(
+                    $app->make(Session::class),
+                    array_keys(config('tailwindnotifications.bags')),
+                    config('tailwindnotifications.bags')
+                );
+            }
+        );
         $this->app->bind('tailwindnotifications', Notifications::class);
     }
 
@@ -92,6 +120,6 @@ class TailwindNotificationsServiceProvider extends ServiceProvider
      */
     protected function registerHelpers()
     {
-        require __DIR__ . '/helpers.php';
+        include __DIR__ . '/helpers.php';
     }
 }
