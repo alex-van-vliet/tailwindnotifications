@@ -81,7 +81,11 @@ class Notifications
                 $this->plurals[$plural] = $singular;
             }
             $this->bags[$singular] = new Bag(
-                $session, $singular, $plural, $options['bags'][$singular] ?? []
+                $session,
+                $singular,
+                $plural,
+                $options['bags'][$singular] ?? [],
+                $options['themes'] ?? []
             );
         }
     }
@@ -104,13 +108,15 @@ class Notifications
     /**
      * Produce the html for all the bags.
      *
+     * @param null|string $theme The theme to apply.
+     *
      * @return string
      */
-    public function render()
+    public function render($theme = null)
     {
         $str = '';
         foreach ($this->bags as $bag) {
-            $str .= $bag->render();
+            $str .= $bag->render($theme);
         }
         return $str;
     }

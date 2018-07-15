@@ -74,8 +74,9 @@ class Bag
      * @param string                                $name    The name of the bag.
      * @param string|false                          $plural  The plural version of the name of the bag.
      * @param array                                 $options The options.
+     * @param array                                 $themes  The themes.
      */
-    public function __construct($session, $name, $plural, $options = [])
+    public function __construct($session, $name, $plural, $options, $themes)
     {
         $this->session = $session;
         $this->name = $name;
@@ -83,6 +84,7 @@ class Bag
         $this->notifications = [];
         $this->flashNotifications = [];
         $this->html = new HTMLHelper(
+            $name,
             [
                 'bag' => [
                     'start' => '',
@@ -92,11 +94,10 @@ class Bag
                     'start' => '',
                     'end' => '',
                 ],
-            ]
+            ],
+            $options['html'] ?? [],
+            $themes
         );
-        if (isset($options['html'])) {
-            $this->html->set($options['html']);
-        }
     }
 
     /**
@@ -144,10 +145,13 @@ class Bag
     /**
      * Render the notifications.
      *
+     * @param string|null $theme The theme.
+     *
      * @return string
      */
-    public function render()
+    public function render($theme = null)
     {
+        $this->html->setTheme($theme);
         $last = count($this->notifications) - 1;
         if ($last < 0) {
             return '';
@@ -170,6 +174,7 @@ class Bag
             $str .= $this->html->notification('end');
         }
         $str .= $this->html->bag('end');
+        $this->html->setTheme($theme);
         return $str;
     }
 

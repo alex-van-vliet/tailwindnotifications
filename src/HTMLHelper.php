@@ -25,6 +25,20 @@ use BadMethodCallException;
 class HTMLHelper
 {
     /**
+     * The name of the bag.
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * The HTML defaults.
+     *
+     * @var array
+     */
+    protected $default;
+
+    /**
      * The HTML values.
      *
      * @var array
@@ -32,34 +46,48 @@ class HTMLHelper
     protected $values;
 
     /**
+     * The themes.
+     *
+     * @var array
+     */
+    protected $themes;
+
+    /**
+     * The selected theme.
+     *
+     * @var string|null
+     */
+    protected $theme;
+
+    /**
      * HTMLHelper constructor.
      *
-     * @param array $defaults The HTML defaults.
+     * @param string $name     The name of the bag.
+     * @param array  $defaults The HTML defaults.
+     * @param array  $values   The HTML values.
+     * @param array  $themes   The themes.
      */
-    public function __construct($defaults)
+    public function __construct($name, $defaults, $values, $themes)
     {
-        $this->values = $defaults;
+        $this->name = $name;
+        $this->default = $defaults;
+        $this->values = $values;
+        $this->themes = $themes;
+        $this->theme = null;
     }
 
     /**
-     * Set the values.
+     * Select the theme.
      *
-     * @param array $values The new HTML values.
+     * @param string|null $theme The theme to select.
      *
-     * @return void
+     * @return self
      */
-    public function set($values)
+    public function setTheme($theme)
     {
-        foreach ($this->values as $part => $positions) {
-            if (isset($values[$part])) {
-                foreach ($positions as $position => $value) {
-                    if (isset($values[$part][$position])) {
-                        $this->values[$part][$position]
-                            = $values[$part][$position];
-                    }
-                }
-            }
-        }
+        $this->theme = $theme;
+
+        return $this;
     }
 
     /**
@@ -76,10 +104,25 @@ class HTMLHelper
     {
         $count = count($arguments);
         if ($count === 1) {
-            if (isset($this->values[$name])
-                && isset($this->values[$name][$arguments[0]])
+            if ($this->theme) {
+                if (isset($this->themes[$this->theme])
+                    && isset($this->themes[$this->theme][$this->name])
+                    && isset($this->themes[$this->theme][$this->name][$name])
+                    && isset($this->themes[$this->theme][$this->name][$name][$arguments[0]])
+                ) {
+                    return $this->themes[$this->theme][$this->name][$name][$arguments[0]];
+                }
+            } else {
+                if (isset($this->values[$name])
+                    && isset($this->values[$name][$arguments[0]])
+                ) {
+                    return $this->values[$name][$arguments[0]];
+                }
+            }
+            if (isset($this->default[$name])
+                && isset($this->default[$name][$arguments[0]])
             ) {
-                return $this->values[$name][$arguments[0]];
+                return $this->default[$name][$arguments[0]];
             }
         }
 
